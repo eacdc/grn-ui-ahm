@@ -101,8 +101,15 @@
 
   let session = null; // { userId, ledgerId, machines, selectedDatabase, username }
 
-  function showError(msg) {
-    if (loginError) loginError.textContent = msg || '';
+  function showError(msg, isInfo = false) {
+    if (loginError) {
+      loginError.textContent = msg || '';
+      if (isInfo) {
+        loginError.classList.add('info');
+      } else {
+        loginError.classList.remove('info');
+      }
+    }
   }
 
   // Load transporter options from backend
@@ -213,11 +220,25 @@
         showError('Please enter username.');
         return;
       }
+      
+      // Show loading message (in cyan color, not red)
+      showError('Logging in, please wait...', true);
+      
+      // Disable submit button during delay
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+      
       try {
+        // Wait for 3 seconds before sending credentials
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
         const data = await login(username);
         swapToPostLogin(data, username);
       } catch (err) {
         showError(err.message || 'Login failed');
+      } finally {
+        // Re-enable submit button
+        if (submitBtn) submitBtn.disabled = false;
       }
     });
   }

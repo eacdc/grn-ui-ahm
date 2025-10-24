@@ -91,6 +91,12 @@ button {
 button:hover { background: var(--primary-600); }
 
 .error { color: var(--danger); min-height: 20px; }
+.error.info { color: #2dd4bf; }
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .hidden { display: none; }
 
