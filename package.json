@@ -1,0 +1,13 @@
+{
+  "name": "grn-ui-ahm",
+  "version": "1.0.0",
+  "description": "GRN Web UI for AHM Database",
+  "scripts": {
+    "start": "python -m http.server 8080 || python3 -m http.server 8080",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "keywords": ["grn", "ahm", "static"],
+  "author": "CDC",
+  "license": "MIT"
+}
+
