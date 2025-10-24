@@ -188,11 +188,11 @@
       username: username
     };
 
-    // Save session to localStorage for persistence across page refreshes
+    // Save session to sessionStorage for tab-specific persistence
     try { 
-      localStorage.setItem('grn_session_ahm', JSON.stringify(session)); 
+      sessionStorage.setItem('grn_session_ahm', JSON.stringify(session)); 
     } catch(_) {
-      console.warn('Failed to save session to localStorage');
+      console.warn('Failed to save session to sessionStorage');
     }
 
     if (infoUsername) infoUsername.textContent = username;
@@ -265,13 +265,13 @@
         // Store barcode in session for later use
         session.challanBarcode = Number(barcode);
         
-        // Save challan state to localStorage for persistence
+        // Save challan state to sessionStorage for tab-specific persistence
         const challanState = {
           barcode,
           ledgerName: data.ledgerName || ''
         };
         try { 
-          localStorage.setItem('grn_challan_ahm', JSON.stringify(challanState)); 
+          sessionStorage.setItem('grn_challan_ahm', JSON.stringify(challanState)); 
         } catch(_) {
           console.warn('Failed to save challan state');
         }
@@ -516,11 +516,11 @@
     });
   }
 
-  // Restore session on page load (from localStorage)
-  // Session persists until user explicitly logs out
+  // Restore session on page load (from sessionStorage - tab-specific)
+  // Session persists only in this tab until user explicitly logs out or closes tab
   (function restoreSession() {
     try {
-      const raw = localStorage.getItem('grn_session_ahm');
+      const raw = sessionStorage.getItem('grn_session_ahm');
       if (!raw) return;
       const saved = JSON.parse(raw);
       if (!saved || !saved.username || !saved.selectedDatabase) return;
@@ -535,7 +535,7 @@
       
       // Also restore challan state if any
       try {
-        const rawChallan = localStorage.getItem('grn_challan_ahm');
+        const rawChallan = sessionStorage.getItem('grn_challan_ahm');
         if (rawChallan) {
           const savedChallan = JSON.parse(rawChallan);
           if (clientNameInput && savedChallan?.ledgerName) {
@@ -548,21 +548,21 @@
       loadTransporters();
     } catch (_) { 
       // If restoration fails, clear bad data
-      localStorage.removeItem('grn_session_ahm');
-      localStorage.removeItem('grn_challan_ahm');
+      sessionStorage.removeItem('grn_session_ahm');
+      sessionStorage.removeItem('grn_challan_ahm');
     }
   })();
 
-  // Logout - Clear session and localStorage
+  // Logout - Clear session and sessionStorage
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      // Clear localStorage on explicit logout
+      // Clear sessionStorage on explicit logout
       try {
-        localStorage.removeItem('grn_session_ahm');
-        localStorage.removeItem('grn_challan_ahm');
-        console.log('Session cleared from localStorage on logout');
+        sessionStorage.removeItem('grn_session_ahm');
+        sessionStorage.removeItem('grn_challan_ahm');
+        console.log('Session cleared from sessionStorage on logout');
       } catch (_) {
-        console.warn('Failed to clear localStorage on logout');
+        console.warn('Failed to clear sessionStorage on logout');
       }
       
       // Clear in-memory session
