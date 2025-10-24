@@ -195,12 +195,7 @@
       username: username
     };
 
-    // Save session to sessionStorage for tab-specific persistence
-    try { 
-      sessionStorage.setItem('grn_session_ahm', JSON.stringify(session)); 
-    } catch(_) {
-      console.warn('Failed to save session to sessionStorage');
-    }
+    // Session stored in memory only - no persistence to avoid DB conflicts
 
     if (infoUsername) infoUsername.textContent = username;
     if (infoDatabase) infoDatabase.textContent = FIXED_DATABASE;
@@ -286,17 +281,6 @@
         // Store barcode in session for later use
         session.challanBarcode = Number(barcode);
         
-        // Save challan state to sessionStorage for tab-specific persistence
-        const challanState = {
-          barcode,
-          ledgerName: data.ledgerName || ''
-        };
-        try { 
-          sessionStorage.setItem('grn_challan_ahm', JSON.stringify(challanState)); 
-        } catch(_) {
-          console.warn('Failed to save challan state');
-        }
-
         // Navigate to challan form view
         if (postLoginSection) postLoginSection.classList.add('hidden');
         if (challanFormSection) challanFormSection.classList.remove('hidden');
@@ -537,55 +521,12 @@
     });
   }
 
-  // Restore session on page load (from sessionStorage - tab-specific)
-  // Session persists only in this tab until user explicitly logs out or closes tab
-  (function restoreSession() {
-    try {
-      const raw = sessionStorage.getItem('grn_session_ahm');
-      if (!raw) return;
-      const saved = JSON.parse(raw);
-      if (!saved || !saved.username || !saved.selectedDatabase) return;
-      
-      // Restore session data
-      session = saved;
-      if (infoUsername) infoUsername.textContent = saved.username;
-      if (infoDatabase) infoDatabase.textContent = FIXED_DATABASE;
-      if (loginSection) loginSection.classList.add('hidden');
-      if (postLoginSection) postLoginSection.classList.remove('hidden');
-      if (logoutBtn) logoutBtn.classList.remove('hidden');
-      
-      // Also restore challan state if any
-      try {
-        const rawChallan = sessionStorage.getItem('grn_challan_ahm');
-        if (rawChallan) {
-          const savedChallan = JSON.parse(rawChallan);
-          if (clientNameInput && savedChallan?.ledgerName) {
-            clientNameInput.value = savedChallan.ledgerName;
-          }
-        }
-      } catch (_) { /* ignore */ }
-      
-      // Load transporters if session restored
-      loadTransporters();
-    } catch (_) { 
-      // If restoration fails, clear bad data
-      sessionStorage.removeItem('grn_session_ahm');
-      sessionStorage.removeItem('grn_challan_ahm');
-    }
-  })();
+  // No session restoration - user must login on each page load
+  // This prevents any database selection conflicts
 
-  // Logout - Clear session and sessionStorage
+  // Logout - Clear in-memory session only
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      // Clear sessionStorage on explicit logout
-      try {
-        sessionStorage.removeItem('grn_session_ahm');
-        sessionStorage.removeItem('grn_challan_ahm');
-        console.log('Session cleared from sessionStorage on logout');
-      } catch (_) {
-        console.warn('Failed to clear sessionStorage on logout');
-      }
-      
       // Clear in-memory session
       session = null;
       
