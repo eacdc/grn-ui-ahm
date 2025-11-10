@@ -448,6 +448,9 @@
           const data = await res.json();
           if (!data || data.status !== true) { alertWithSiren(data?.error || 'Failed to update delivery note'); return; }
           const sp = data.sp || {};
+          if (sp.transactionId) {
+            window.__lastFgTransactionId = sp.transactionId;
+          }
 
           if (deliveryTableBody) {
             const newRow = document.createElement('tr');
